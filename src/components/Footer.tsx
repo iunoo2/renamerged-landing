@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { MessageSquare, Github } from 'lucide-react';
+import { MessageSquare, Github, Mail, FileText, Shield } from 'lucide-react';
 import { APP_CONFIG } from '../config';
 
 export default function Footer() {
@@ -22,14 +22,17 @@ export default function Footer() {
             <h3 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-3">
               Renamerged
             </h3>
-            <p className="text-gray-500 text-sm leading-relaxed">
+            <p className="text-gray-500 text-sm leading-relaxed mb-4">
               Solusi manajemen Faktur Pajak #1 untuk profesional.
+            </p>
+            <p className="text-gray-600 text-xs">
+              Made with passion for Indonesian tax professionals
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="md:col-span-1">
-            <h4 className="text-white text-sm font-semibold mb-4">Quick Links</h4>
+            <h4 className="text-white text-sm font-semibold mb-4">Navigation</h4>
             <nav className="space-y-2">
               <button
                 onClick={() => scrollToSection('features')}
@@ -58,10 +61,58 @@ export default function Footer() {
             </nav>
           </div>
 
-          {/* Contact */}
+          {/* Resources */}
           <div className="md:col-span-1">
-            <h4 className="text-white text-sm font-semibold mb-4">Contact</h4>
+            <h4 className="text-white text-sm font-semibold mb-4">Resources</h4>
             <div className="space-y-2">
+              <button
+                onClick={() => scrollToSection('installation')}
+                className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors text-sm"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Installation Guide</span>
+              </button>
+              <button
+                onClick={() => scrollToSection('security-transparency')}
+                className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors text-sm"
+              >
+                <Shield className="w-4 h-4" />
+                <span>Security Report</span>
+              </button>
+              <a
+                href="https://github.com/iunoxid"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors text-sm"
+              >
+                <Github className="w-4 h-4" />
+                <span>Documentation</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Contact & Support */}
+          <div className="md:col-span-1">
+            <h4 className="text-white text-sm font-semibold mb-4">Support</h4>
+            <div className="space-y-2">
+              <a
+                href="https://t.me/iunoin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors text-sm"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Report Bug</span>
+              </a>
+              <a
+                href="https://t.me/iunoin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors text-sm"
+              >
+                <Mail className="w-4 h-4" />
+                <span>Request Feature</span>
+              </a>
               <a
                 href="https://github.com/iunoxid"
                 target="_blank"
@@ -71,23 +122,7 @@ export default function Footer() {
                 <Github className="w-4 h-4" />
                 <span>GitHub</span>
               </a>
-              <a
-                href="https://t.me/iunoin"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors text-sm"
-              >
-                <MessageSquare className="w-4 h-4" />
-                <span>Telegram</span>
-              </a>
             </div>
-          </div>
-
-          {/* Version Info */}
-          <div className="md:col-span-1">
-            <h4 className="text-white text-sm font-semibold mb-4">Version</h4>
-            <p className="text-gray-500 text-sm mb-1">v{APP_CONFIG.appVersion}</p>
-            <p className="text-gray-600 text-xs">Windows 10/11</p>
           </div>
         </div>
 
