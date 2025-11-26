@@ -1,6 +1,7 @@
 import { X, Download, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { APP_CONFIG } from '../config';
 
 interface DownloadModalProps {
@@ -10,16 +11,24 @@ interface DownloadModalProps {
 
 export default function DownloadModal({ isOpen, onClose }: DownloadModalProps) {
   const [isAgreed, setIsAgreed] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const handleDownload = () => {
-    if (isAgreed) {
+    if (isAgreed && recaptchaToken) {
       window.open(APP_CONFIG.downloadUrl, '_blank');
       onClose();
       setIsAgreed(false);
+      setRecaptchaToken(null);
+      recaptchaRef.current?.reset();
     }
   };
 
-  const isDownloadEnabled = isAgreed;
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
+  };
+
+  const isDownloadEnabled = isAgreed && recaptchaToken;
 
   return (
     <AnimatePresence>
@@ -80,6 +89,15 @@ export default function DownloadModal({ isOpen, onClose }: DownloadModalProps) {
                     Saya setuju menggunakan aplikasi ini untuk keperluan pribadi dan tidak akan memperjualbelikannya
                   </span>
                 </label>
+
+                <div className="flex justify-center">
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                    onChange={handleRecaptchaChange}
+                    theme="dark"
+                  />
+                </div>
               </div>
 
               <motion.button
@@ -94,7 +112,7 @@ export default function DownloadModal({ isOpen, onClose }: DownloadModalProps) {
                 }`}
               >
                 <Download size={20} />
-                {isDownloadEnabled ? 'Download Sekarang' : 'Centang persetujuan untuk download'}
+                {isDownloadEnabled ? 'Download Sekarang' : 'Centang persetujuan & verifikasi reCAPTCHA'}
               </motion.button>
 
               <p className="text-gray-500 text-xs text-center mt-4">
