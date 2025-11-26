@@ -4,6 +4,7 @@ import HeroSection from './components/HeroSection';
 import StatsCounter from './components/StatsCounter';
 import FeaturesSection from './components/FeaturesSection';
 import HowItWorksSection from './components/HowItWorksSection';
+import ExamplesSection from './components/ExamplesSection';
 import SecuritySection from './components/SecuritySection';
 import SecurityTransparencySection from './components/SecurityTransparencySection';
 import InstallationGuideSection from './components/InstallationGuideSection';
@@ -22,6 +23,7 @@ export default function App() {
       <StatsCounter />
       <FeaturesSection />
       <HowItWorksSection />
+      <ExamplesSection />
       <SecuritySection />
       <SecurityTransparencySection />
       <InstallationGuideSection />

@@ -76,33 +76,30 @@ export default function StatsCounter() {
   ];
 
   return (
-    <section className="relative py-16 sm:py-20 px-4">
+    <section className="relative py-8 sm:py-12 px-4">
       <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900" />
 
-      <div className="relative z-10 max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <div className="flex items-center justify-center gap-3 sm:gap-6">
           {stats.map((stat, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative group"
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="flex items-center gap-2 sm:gap-3 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 hover:border-purple-500/30 transition-all"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
+              <div className={`p-1.5 sm:p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                <stat.icon className="text-white" size={16} />
+              </div>
 
-              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center hover:border-purple-500/30 transition-all">
-                <div className={`inline-flex p-2 sm:p-3 rounded-lg bg-gradient-to-br ${stat.color} mb-3 sm:mb-4`}>
-                  <stat.icon className="text-white" size={20} />
-                </div>
-
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">
+              <div className="text-left">
+                <div className="text-lg sm:text-xl font-bold text-white">
                   {stat.value.toLocaleString()}
                   {stat.suffix && <span className="text-purple-400">{stat.suffix}</span>}
                 </div>
-
-                <div className="text-xs sm:text-sm text-gray-400">
+                <div className="text-[10px] sm:text-xs text-gray-400">
                   {stat.label}
                 </div>
               </div>
