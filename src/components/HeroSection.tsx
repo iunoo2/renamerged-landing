@@ -1,5 +1,6 @@
 import { Download, Zap, ShieldCheck, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { APP_CONFIG } from '../config';
 
 interface HeroSectionProps {
@@ -7,6 +8,31 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ onDownloadClick }: HeroSectionProps) {
+  const [totalDownloads, setTotalDownloads] = useState(0);
+
+  useEffect(() => {
+    const fetchDownloads = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-download`,
+          {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            },
+          }
+        );
+        const data = await response.json();
+        setTotalDownloads(data.downloads || 0);
+      } catch (error) {
+        console.error('Error fetching downloads:', error);
+        setTotalDownloads(0);
+      }
+    };
+
+    fetchDownloads();
+    const interval = setInterval(fetchDownloads, 30000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-16 px-4 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-slate-900 to-blue-900/20" />
@@ -70,19 +96,38 @@ export default function HeroSection({ onDownloadClick }: HeroSectionProps) {
           </motion.p>
 
           <div>
-            <motion.button
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.6)" }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onDownloadClick}
-              className="w-full md:w-auto flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-purple-600 to-blue-600 px-6 md:px-10 py-4 md:py-5 rounded-xl font-bold text-base md:text-xl text-white hover:from-purple-500 hover:to-blue-500 transition-all shadow-2xl shadow-purple-500/50"
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3"
             >
-              <Download size={20} className="md:w-[26px] md:h-[26px]" />
-              <span className="hidden sm:inline">Download Sekarang (Windows .exe)</span>
-              <span className="sm:hidden">Download Sekarang</span>
-            </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139, 92, 246, 0.6)" }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onDownloadClick}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-purple-600 to-blue-600 px-6 md:px-10 py-4 md:py-5 rounded-xl font-bold text-base md:text-xl text-white hover:from-purple-500 hover:to-blue-500 transition-all shadow-2xl shadow-purple-500/50"
+              >
+                <Download size={20} className="md:w-[26px] md:h-[26px]" />
+                <span className="hidden sm:inline">Download Sekarang (Windows .exe)</span>
+                <span className="sm:hidden">Download Sekarang</span>
+              </motion.button>
+
+              {totalDownloads > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 }}
+                  className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/30 rounded-lg px-3 py-2"
+                >
+                  <Download className="text-purple-400" size={16} />
+                  <span className="text-white font-semibold text-sm">
+                    {totalDownloads.toLocaleString()}
+                  </span>
+                  <span className="text-gray-400 text-sm">downloads</span>
+                </motion.div>
+              )}
+            </motion.div>
 
             <motion.p
               initial={{ opacity: 0 }}
