@@ -68,8 +68,8 @@ export default function ChangelogSection() {
         </motion.div>
 
         <div className="max-w-4xl mx-auto">
-          <AnimatePresence mode="sync">
           <div className="space-y-6">
+          <AnimatePresence mode="popLayout">
           {visibleVersions.map((version, index) => {
             const isExpanded = expandedVersions.has(version.version);
             const hasContent =
@@ -80,9 +80,9 @@ export default function ChangelogSection() {
             return (
               <motion.div
                 key={version.version}
-                initial={{ opacity: 0, y: 20, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -20, height: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                 className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"
               >
@@ -190,8 +190,8 @@ export default function ChangelogSection() {
               </motion.div>
             );
           })}
-          </div>
           </AnimatePresence>
+          </div>
 
           {hasMoreVersions && (
             <motion.div
