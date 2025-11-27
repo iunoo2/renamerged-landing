@@ -31,7 +31,7 @@ const steps = [
 export default function InstallationGuideSection() {
   return (
     <section id="panduan" className="relative py-24 px-4">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-800" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900 to-slate-900/95" />
 
       <div className="relative z-10 max-w-7xl mx-auto">
         <motion.div

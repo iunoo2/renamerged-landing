@@ -69,8 +69,8 @@ export default function ChangelogSection() {
 
         <div className="max-w-4xl mx-auto">
           <motion.div
-            animate={{ height: 'auto' }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            layout
+            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
             className="space-y-6"
           >
           {visibleVersions.map((version, index) => {
@@ -83,10 +83,15 @@ export default function ChangelogSection() {
             return (
               <motion.div
                 key={version.version}
+                layout
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{
+                  layout: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
+                  opacity: { duration: 0.3 },
+                  y: { duration: 0.3 }
+                }}
                 className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"
               >
                 <button
