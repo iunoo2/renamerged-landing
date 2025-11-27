@@ -1,6 +1,80 @@
 {
   "versions": [
     {
+      "version": "2.4.1",
+      "date": "11/08/2025",
+      "penambahan": [
+        "Penambahan Enchancement pada aplikasi"
+      ],
+      "perubahan": [],
+      "perbaikan": [
+        "Fix Bug tombol proses tidak bisa ditekan setelah selesai proses",
+        "Fix Minor bugs",
+        "Fix Memori leak"
+      ]
+    },
+    {
+      "version": "2.4.0",
+      "date": "06/08/2025",
+      "penambahan": [
+        "Real-time User Settings Persistence: Aplikasi sekarang menyimpan pengaturan user secara real-time (tema, mode, separator, checkbox settings, dll) dengan throttling system untuk performa optimal",
+        "Advanced Error Handling: Pesan error yang lebih jelas dan informatif dengan solusi praktis untuk berbagai masalah umum",
+        "Smart Reference Truncation: Sistem pemotongan referensi yang cerdas dengan visual delimiter {} untuk referensi yang dipotong",
+        "Filename Length Warning Dialog: Peringatan otomatis ketika nama file melebihi batas Windows (260 karakter)",
+        "Modern UI Overhaul: Desain ulang lengkap dengan card-based layout, Slate color palette, Inter font, dan responsive design",
+        "Expandable Settings Panel: Pengaturan proses dapat diexpand/collapse dengan tombol chevron untuk UI yang lebih bersih",
+        "Real-time PDF Counter: Counter PDF otomatis yang mendeteksi jumlah file PDF di folder input secara real-time",
+        "Improved Component Layout: Repositioning komponen untuk UX flow yang lebih baik"
+      ],
+      "perubahan": [
+        "Improved Regex Patterns: Pola regex yang lebih robust untuk ekstraksi referensi dengan dukungan multi-line",
+        "Enhanced Filename Generation: Algoritma generasi nama file yang lebih pintar dengan prioritas nama perusahaan, tanggal, dan nomor faktur",
+        "Better Settings Management: Sistem manajemen pengaturan yang lebih baik dengan validasi dan fallback ke default settings",
+        "Dynamic Settings Auto-Save: Pengaturan sekarang disimpan otomatis dengan delay 1 detik untuk menghindari terlalu banyak file write operations",
+        "Tombol Hubungi Developer: Ditambahkan tombol \"Hubungi Dev\" di header untuk langsung menghubungi developer melalui Telegram (@iunoin)",
+        "Scrollable Main Container: Container utama sekarang scrollable untuk mengakomodasi semua komponen",
+        "Card-based Design System: Semua komponen menggunakan card design dengan consistent border radius, spacing, dan color system",
+        "Improved Text Alignment: Semua text label menggunakan anchor=\"w\" untuk alignment yang konsisten dan rapi",
+        "Path Auto-save Removal: Path input/output tidak lagi disimpan di user settings untuk menghindari kebingungan session-specific data"
+      ],
+      "perbaikan": [
+        "Fixed Division by Zero Error: Perbaikan error \"division by zero\" dalam perhitungan progress dengan menggunakan max(total_files, 1)",
+        "Improved Reference Extraction: Perbaikan ekstraksi referensi yang lebih akurat dengan handling untuk format yang berbeda-beda",
+        "Better Filename Validation: Validasi nama file yang lebih baik dengan sanitasi karakter invalid dan batasan panjang yang tepat",
+        "Enhanced User Experience: Pengalaman pengguna yang lebih baik dengan pesan error yang informatif dan pengaturan yang persisten",
+        "Fixed Draggable Component Order Persistence: Urutan draggable components sekarang tersimpan dengan benar",
+        "Copyright Repositioning: Copyright dipindahkan ke bawah folder hasil untuk tidak menghalangi progress bar",
+        "Component Layout Issues: Perbaikan masalah layout dan spacing antar komponen untuk tampilan yang lebih konsisten",
+        "Settings Expanded State Persistence: Status expand/collapse pengaturan sekarang tersimpan dan dipulihkan dengan benar"
+      ]
+    },
+    {
+      "version": "2.3.2",
+      "date": "14/05/2025",
+      "penambahan": [
+        "Opsi pemisah nama file (strip, underscore, spasi) di mode \"Rename Saja\" melalui dropdown Pemisah Nama File PDF",
+        "Opsi pengganti garis miring (underscore, spasi, strip) untuk referensi melalui dropdown Pengganti Garis Miring untuk Referensi",
+        "Tooltip dengan tombol tanda tanya untuk Pemisah Nama File PDF dan Pengganti Garis Miring untuk Referensi, dengan delay 0.1s untuk muncul dan 0.5s untuk hilang",
+        "Fitur geser komponen nama file secara horizontal di mode \"Rename Saja\" menggunakan tombol panah kiri/kanan, berpindah satu posisi",
+        "Fitur disable tombol \"Proses\" selama pemrosesan untuk mencegah klik ganda",
+        "Logging debug untuk pengaturan dan ekstraksi nomor faktur, membantu debugging"
+      ],
+      "perubahan": [
+        "Default separator dan pengganti garis miring diatur menjadi spasi (ditampilkan sebagai \"(spasi)\" di UI)",
+        "Opsi spasi di dropdown Pemisah Nama File PDF dan Pengganti Garis Miring untuk Referensi diubah menjadi \"(spasi)\" untuk kejelasan",
+        "Ukuran box dan centang di komponen nama file disesuaikan untuk estetika lebih rapi (width=220, height=36, font=10, checkbox=14x14)",
+        "Tinggi jendela aplikasi dikurangi dari 1000px ke 900px untuk menghilangkan ruang kosong berlebih"
+      ],
+      "perbaikan": [
+        "Bug di mana komponen nama file yang dicentang (misalnya, Referensi) tidak muncul di nama file",
+        "Bug di mana komponen yang tidak dicentang masih muncul di nama file",
+        "Bug di mana nomor faktur yang tidak ditemukan menghasilkan \"Faktur tidak ditemukan\" di nama file; sekarang diabaikan jika tidak valid",
+        "Bug di mana hasil disimpan tidak muncul dan tombol \"Buka Folder Hasil\" error karena output_path_var tidak diperbarui",
+        "Bug tooltip tidak hilang saat kursor berpindah ke dropdown parameter atau saat dua tooltip aktif",
+        "Menghapus tanda titik dua (:) dari opsi pemisah dan pengganti garis miring karena tidak valid untuk nama file di Windows"
+      ]
+    },
+    {
       "version": "2.3.1",
       "date": "25/04/2025",
       "penambahan": [

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, RefreshCw, Wrench, Calendar } from 'lucide-react';
+import { Plus, RefreshCw, Wrench, Calendar, ChevronDown } from 'lucide-react';
 
 interface ChangelogVersion {
   version: string;
@@ -16,7 +16,10 @@ interface ChangelogData {
 
 export default function ChangelogSection() {
   const [changelog, setChangelog] = useState<ChangelogData | null>(null);
-  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set(['2.0.0']));
+  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set(['2.4.1']));
+  const [showAllVersions, setShowAllVersions] = useState(false);
+
+  const INITIAL_VISIBLE_COUNT = 3;
 
   useEffect(() => {
     fetch('/changelog.json')
@@ -41,6 +44,11 @@ export default function ChangelogSection() {
     return null;
   }
 
+  const visibleVersions = showAllVersions
+    ? changelog.versions
+    : changelog.versions.slice(0, INITIAL_VISIBLE_COUNT);
+  const hasMoreVersions = changelog.versions.length > INITIAL_VISIBLE_COUNT;
+
   return (
     <section id="changelog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4">
@@ -59,7 +67,7 @@ export default function ChangelogSection() {
         </motion.div>
 
         <div className="max-w-4xl mx-auto space-y-6">
-          {changelog.versions.map((version, index) => {
+          {visibleVersions.map((version, index) => {
             const isExpanded = expandedVersions.has(version.version);
             const hasContent =
               version.penambahan.length > 0 ||
@@ -179,6 +187,30 @@ export default function ChangelogSection() {
               </motion.div>
             );
           })}
+
+          {hasMoreVersions && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="flex justify-center pt-4"
+            >
+              <button
+                onClick={() => setShowAllVersions(!showAllVersions)}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-md hover:shadow-lg"
+              >
+                <span className="font-medium">
+                  {showAllVersions ? 'Sembunyikan Changelog Lama' : 'Lihat Changelog Lama'}
+                </span>
+                <motion.div
+                  animate={{ rotate: showAllVersions ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ChevronDown size={20} />
+                </motion.div>
+              </button>
+            </motion.div>
+          )}
         </div>
       </div>
     </section>
