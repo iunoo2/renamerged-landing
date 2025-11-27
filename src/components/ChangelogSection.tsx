@@ -16,7 +16,7 @@ interface ChangelogData {
 
 export default function ChangelogSection() {
   const [changelog, setChangelog] = useState<ChangelogData | null>(null);
-  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set(['2.4.1']));
+  const [expandedVersions, setExpandedVersions] = useState<Set<string>>(new Set(['3.0.0']));
   const [showAllVersions, setShowAllVersions] = useState(false);
 
   const INITIAL_VISIBLE_COUNT = 3;
@@ -50,8 +50,9 @@ export default function ChangelogSection() {
   const hasMoreVersions = changelog.versions.length > INITIAL_VISIBLE_COUNT;
 
   return (
-    <section id="changelog" className="py-20 bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4">
+    <section id="changelog" className="py-20 bg-gradient-to-br from-blue-50 via-white to-gray-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 via-transparent to-purple-100/20 pointer-events-none" />
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -66,7 +67,12 @@ export default function ChangelogSection() {
           </p>
         </motion.div>
 
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            animate={{ height: 'auto' }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="space-y-6"
+          >
           {visibleVersions.map((version, index) => {
             const isExpanded = expandedVersions.has(version.version);
             const hasContent =
@@ -187,6 +193,7 @@ export default function ChangelogSection() {
               </motion.div>
             );
           })}
+          </motion.div>
 
           {hasMoreVersions && (
             <motion.div

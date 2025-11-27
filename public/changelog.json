@@ -1,6 +1,57 @@
 {
   "versions": [
     {
+      "version": "3.0.0",
+      "date": "25/11/2025",
+      "penambahan": [
+        "Penambahan fitur Drag & Drop untuk mengatur urutan komponen",
+        "Penambahan arsitektur Modular (Class-Based) agar kode lebih rapi",
+        "Penambahan Visual Separator antara input file dan pengaturan",
+        "Penambahan Logo Aplikasi"
+      ],
+      "perubahan": [
+        "Perubahan Layout UI total menjadi Compact Dashboard (Single Window)",
+        "Perubahan alur UX (Input File di atas, Pengaturan di tengah)",
+        "Perubahan style tombol Header menjadi Modern Outline (Ghost Button)",
+        "Perubahan warna Active State tombol agar lebih kontras"
+      ],
+      "perbaikan": [
+        "Fix Bug Drag & Drop (Ghosting & Clipping window issue)",
+        "Fix Bug Tooltip muncul bentrok saat dragging (Race Condition)",
+        "Fix Visual Glitch tombol berkedip saat re-ordering",
+        "Fix Warna teks tombol Header tidak terbaca saat Hover",
+        "Fix Logic Dropdown tidak ter-disable otomatis pada mode Merge"
+      ]
+    },
+    {
+      "version": "2.6.0",
+      "date": "05/11/2025",
+      "penambahan": [
+        "Opsi \"Bungkus Referensi dengan Kurung ( )\" di GUI (Pengaturan Proses > Advanced). Saat aktif, Referensi akan dibungkus, contoh: \"-xxx-(CV2501001)\""
+      ],
+      "perubahan": [],
+      "perbaikan": [
+        "Mencegah RecursionError pasca proses, UI tetap responsif, pembaruan progress stabil (aman dari NaN/Inf)",
+        "Hapus update()/update_idletasks() dari setter progress dan clamp nilai 0..1",
+        "Jadwalkan pembaruan UI via after(0) dan hilangkan update()/sleep di callback lama",
+        "Progress bar memanggil update()/update_idletasks() dari callback after(), memicu redraw berulang di Tk Canvas/CTkProgressBar"
+      ]
+    },
+    {
+      "version": "2.5.0",
+      "date": "01/11/2025",
+      "penambahan": [
+        "Penambahan Enchancement pada aplikasi"
+      ],
+      "perubahan": [
+        "Pemeriksa panjang nama file (preview internal) disesuaikan dengan opsi wrap dan pengganti \"/\" agar hasil estimasi sesuai output akhir"
+      ],
+      "perbaikan": [
+        "Penanganan karakter \"/\" pada Referensi kini mengikuti pilihan pengguna (pengganti \"/\" di Advanced), tidak lagi otomatis menjadi spasi saat ekstraksi",
+        "Karakter terlarang pada Referensi tetap dibersihkan, dengan pengecualian \"/\" (ditangani sesuai pengaturan pengguna saat pembuatan nama file)"
+      ]
+    },
+    {
       "version": "2.4.1",
       "date": "11/08/2025",
       "penambahan": [
