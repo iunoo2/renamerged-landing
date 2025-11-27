@@ -1,6 +1,64 @@
 {
   "versions": [
     {
+      "version": "2.3.1",
+      "date": "25/04/2025",
+      "penambahan": [
+        "Menambahkan log debugging di progress_callback untuk mencatat nilai progress di setiap tahap"
+      ],
+      "perubahan": [
+        "Sekarang ukuran jendela utama menjadi 1000x850 untuk memberikan tampilan yang lebih ringkas dan proporsional",
+        "Lebar Progress Bar disesuaikan dari 500 menjadi 350 untuk menyesuaikan dengan ukuran jendela yang baru",
+        "Ditambahkan jeda waktu time.sleep(0.05) di progress_callback untuk memperlambat pembaruan visual progress bar agar lebih halus",
+        "Pembaruan progress di tahap \"processing\" dan \"finalizing\" dilakukan per file individual untuk langkah yang lebih kecil"
+      ],
+      "perbaikan": []
+    },
+    {
+      "version": "2.3.0",
+      "date": "20/04/2025",
+      "penambahan": [
+        "Sekarang bisa memilih antara \"Rename Saja\" (tanpa merge) atau \"Rename dan Merge\"",
+        "Menambahkan fitur kustomisasi komponen nama file untuk mode \"Rename Saja\" (Nama Lawan Transaksi, Tanggal Faktur Pajak, Referensi, Nomor Faktur Pajak)"
+      ],
+      "perubahan": [
+        "Tampilan baru yang lebih modular dengan komponen terpisah",
+        "Membuat teks statistik lebih rapat untuk memberikan lebih banyak ruang pada preview file PDF",
+        "Memperkecil ukuran kotak checkbox dan menyeragamkan font teks checkbox dengan elemen lain",
+        "Memperpanjang progress bar untuk tampilan yang lebih profesional",
+        "Mengubah warna tombol \"Donasi\" menjadi merah untuk menarik perhatian",
+        "GUI sekarang lebih modular dengan komponen terpisah untuk setiap bagian"
+      ],
+      "perbaikan": [
+        "GUI: Memperbaiki warna teks persentase progress bar di mode light agar lebih terlihat",
+        "Memperbaiki bug persentase progress bar yang samar saat di mode light"
+      ]
+    },
+    {
+      "version": "2.2.0",
+      "date": "14/04/2025",
+      "penambahan": [],
+      "perubahan": [],
+      "perbaikan": [
+        "Perbaikan Pada GUI (Crash dalam keadaan tertentu)"
+      ]
+    },
+    {
+      "version": "2.1.0",
+      "date": "10/04/2025",
+      "penambahan": [
+        "Ditambahkan antarmuka grafis dengan progress bar untuk memantau proses",
+        "Menampilkan daftar file PDF yang terdeteksi sebelum diproses",
+        "Memeriksa apakah file PDF valid (tidak korup) sebelum diproses",
+        "Menambahkan opsi untuk beralih antara dark dan light mode"
+      ],
+      "perubahan": [
+        "Log proses di GUI dihapus untuk menyederhanakan tampilan, tetapi tetap disimpan di file log.txt",
+        "Tombol \"Donasi\" dan \"Ganti Tema\" disusun rapi di sisi kanan atas, sejajar dengan tombol \"Browse\""
+      ],
+      "perbaikan": []
+    },
+    {
       "version": "2.0.0",
       "date": "09/04/2025",
       "penambahan": [
