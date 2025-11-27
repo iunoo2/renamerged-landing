@@ -50,7 +50,7 @@ export default function ChangelogSection() {
   const hasMoreVersions = changelog.versions.length > INITIAL_VISIBLE_COUNT;
 
   return (
-    <section id="changelog" className="py-20 bg-gradient-to-br from-blue-50 via-white to-gray-50 relative">
+    <section id="changelog" className="py-20 bg-gradient-to-br from-blue-50 via-white to-gray-50 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-100/20 via-transparent to-purple-100/20 pointer-events-none" />
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -67,11 +67,7 @@ export default function ChangelogSection() {
           </p>
         </motion.div>
 
-        <motion.div
-          className="max-w-4xl mx-auto"
-          layout
-          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        >
+        <div className="max-w-4xl mx-auto">
           <div className="space-y-6">
           {visibleVersions.map((version, index) => {
             const isExpanded = expandedVersions.has(version.version);
@@ -83,15 +79,10 @@ export default function ChangelogSection() {
             return (
               <motion.div
                 key={version.version}
-                layout
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{
-                  layout: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-                  opacity: { duration: 0.3 },
-                  y: { duration: 0.3 }
-                }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
                 className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100"
               >
                 <button
@@ -133,7 +124,7 @@ export default function ChangelogSection() {
                     height: isExpanded ? 'auto' : 0,
                     opacity: isExpanded ? 1 : 0,
                   }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                   className="overflow-hidden"
                 >
                   <div className="px-6 pb-6 space-y-6">
@@ -202,14 +193,9 @@ export default function ChangelogSection() {
 
           {hasMoreVersions && (
             <motion.div
-              layout
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                layout: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-                opacity: { duration: 0.3 },
-                y: { duration: 0.3 }
-              }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               className="flex justify-center pt-4"
             >
               <button
@@ -228,7 +214,7 @@ export default function ChangelogSection() {
               </button>
             </motion.div>
           )}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
