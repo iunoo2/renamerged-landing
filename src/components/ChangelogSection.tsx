@@ -192,9 +192,9 @@ export default function ChangelogSection() {
               opacity: showAllVersions ? 1 : 0,
             }}
             transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
+            className="overflow-hidden mt-6"
           >
-            <div className="space-y-6 mt-6">
+            <div className="space-y-6">
               {olderVersions.map((version) => {
                 const isExpanded = expandedVersions.has(version.version);
                 const hasContent =
