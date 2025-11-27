@@ -2,7 +2,20 @@
 
 Panduan lengkap untuk setup Supabase di project kamu sendiri.
 
-## 1. Buat Supabase Project
+## 1. Setup Google reCAPTCHA
+
+1. Buka [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin)
+2. Login dengan Google Account
+3. Klik **+** atau **Register a new site**
+4. Isi form:
+   - **Label**: RenamerGED (atau nama bebas)
+   - **reCAPTCHA type**: Pilih **reCAPTCHA v2** → **"I'm not a robot" Checkbox**
+   - **Domains**: Tambahkan domain kamu (contoh: `renamerged.com`) dan `localhost` untuk testing
+5. Accept Terms of Service
+6. Klik **Submit**
+7. Salin **Site Key** (yang akan dipakai di `.env`)
+
+## 2. Buat Supabase Project
 
 1. Buka [supabase.com](https://supabase.com) dan login/daftar
 2. Klik **New Project**
@@ -12,7 +25,7 @@ Panduan lengkap untuk setup Supabase di project kamu sendiri.
    - **Region**: Pilih region terdekat (Singapore/Tokyo untuk Indonesia)
 4. Klik **Create new project** dan tunggu beberapa menit
 
-## 2. Salin API Keys
+## 3. Salin API Keys
 
 1. Di dashboard Supabase, buka **Project Settings** (icon gear di kiri bawah)
 2. Pilih **API**
@@ -20,19 +33,22 @@ Panduan lengkap untuk setup Supabase di project kamu sendiri.
    - **Project URL** (contoh: `https://xxxxx.supabase.co`)
    - **anon public** key (Key yang panjang dimulai dengan `eyJ...`)
 
-## 3. Update File .env
+## 4. Update File .env
 
 Buka file `.env` di root project dan update:
 
 ```env
-VITE_RECAPTCHA_SITE_KEY=6LewvRgsAAAAAHa2D5noW7Qsw8Ea6svTBQdE8Ikt
+VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key_here
 VITE_SUPABASE_URL=https://xxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-Ganti `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY` dengan yang kamu salin tadi.
+Ganti dengan keys yang sudah kamu salin:
+- `VITE_RECAPTCHA_SITE_KEY` → Site Key dari Google reCAPTCHA (step 1)
+- `VITE_SUPABASE_URL` → Project URL dari Supabase (step 3)
+- `VITE_SUPABASE_ANON_KEY` → anon public key dari Supabase (step 3)
 
-## 4. Jalankan Database Migration
+## 5. Jalankan Database Migration
 
 Di dashboard Supabase:
 
@@ -78,7 +94,7 @@ ON CONFLICT DO NOTHING;
 
 4. Klik **Run** (atau Ctrl+Enter)
 
-## 5. Deploy Edge Function
+## 6. Deploy Edge Function
 
 ### Cara 1: Via Dashboard (Recommended)
 
@@ -105,7 +121,7 @@ supabase link --project-ref xxxxx
 supabase functions deploy track-download
 ```
 
-## 6. Test Setup
+## 7. Test Setup
 
 1. Jalankan project: `npm run dev`
 2. Buka website di browser
@@ -113,7 +129,7 @@ supabase functions deploy track-download
 4. Isi verifikasi dan download
 5. Refresh halaman - counter seharusnya naik
 
-## 7. Verifikasi di Database
+## 8. Verifikasi di Database
 
 Di Supabase dashboard:
 
