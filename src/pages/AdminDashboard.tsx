@@ -34,6 +34,8 @@ export default function AdminDashboard() {
 
   const [config, setConfig] = useState<SiteConfig | null>(null);
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([]);
+  const [showAllChangelogs, setShowAllChangelogs] = useState(false);
+  const [deleteItemConfirm, setDeleteItemConfirm] = useState<{entryId: string, type: string, index: number} | null>(null);
 
   const [activeTab, setActiveTab] = useState<'config' | 'changelog'>('config');
 
@@ -144,17 +146,26 @@ export default function AdminDashboard() {
   };
 
   const removeChange = (entryId: string, type: 'penambahan' | 'perubahan' | 'perbaikan', changeIndex: number) => {
-    setChangelog(changelog.map(entry =>
-      entry.id === entryId
-        ? {
-            ...entry,
-            changes: {
-              ...entry.changes,
-              [type]: entry.changes[type].filter((_, i) => i !== changeIndex)
+    const confirmKey = `${entryId}-${type}-${changeIndex}`;
+    const currentConfirm = deleteItemConfirm;
+
+    if (currentConfirm?.entryId === entryId && currentConfirm?.type === type && currentConfirm?.index === changeIndex) {
+      setChangelog(changelog.map(entry =>
+        entry.id === entryId
+          ? {
+              ...entry,
+              changes: {
+                ...entry.changes,
+                [type]: entry.changes[type].filter((_, i) => i !== changeIndex)
+              }
             }
-          }
-        : entry
-    ));
+          : entry
+      ));
+      setDeleteItemConfirm(null);
+    } else {
+      setDeleteItemConfirm({ entryId, type, index: changeIndex });
+      setTimeout(() => setDeleteItemConfirm(null), 3000);
+    }
   };
 
   const deleteChangelogEntry = (id: string) => {
@@ -410,7 +421,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-4">
-                  {changelog.map((entry, index) => (
+                  {(showAllChangelogs ? changelog : changelog.slice(0, 5)).map((entry, index) => (
                     <motion.div
                       key={entry.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -496,15 +507,39 @@ export default function AdminDashboard() {
                                   className="flex-1 px-3 py-2 bg-slate-800 border border-green-500/30 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                                   placeholder="Tambahkan fitur baru..."
                                 />
-                                <button
-                                  onClick={() => removeChange(entry.id, 'penambahan', index)}
-                                  className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                <AnimatePresence>
+                                  {editingEntryId === entry.id && (
+                                    <motion.button
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.8 }}
+                                      onClick={() => removeChange(entry.id, 'penambahan', index)}
+                                      className={`px-3 py-2 rounded transition-colors ${
+                                        deleteItemConfirm?.entryId === entry.id &&
+                                        deleteItemConfirm?.type === 'penambahan' &&
+                                        deleteItemConfirm?.index === index
+                                          ? 'bg-red-500 hover:bg-red-600 text-white'
+                                          : 'bg-red-500/10 hover:bg-red-500/20 text-red-400'
+                                      }`}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </motion.button>
+                                  )}
+                                </AnimatePresence>
                               </div>
                             ))}
                           </div>
+                          {deleteItemConfirm?.entryId === entry.id && deleteItemConfirm?.type === 'penambahan' && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex items-center gap-2 p-2 mt-2 bg-red-500/10 border border-red-500/20 rounded-lg"
+                            >
+                              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                              <p className="text-xs text-red-400">Klik tombol delete lagi untuk konfirmasi!</p>
+                            </motion.div>
+                          )}
                         </div>
 
                         <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
@@ -527,15 +562,39 @@ export default function AdminDashboard() {
                                   className="flex-1 px-3 py-2 bg-slate-800 border border-blue-500/30 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   placeholder="Ubah fitur yang ada..."
                                 />
-                                <button
-                                  onClick={() => removeChange(entry.id, 'perubahan', index)}
-                                  className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                <AnimatePresence>
+                                  {editingEntryId === entry.id && (
+                                    <motion.button
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.8 }}
+                                      onClick={() => removeChange(entry.id, 'perubahan', index)}
+                                      className={`px-3 py-2 rounded transition-colors ${
+                                        deleteItemConfirm?.entryId === entry.id &&
+                                        deleteItemConfirm?.type === 'perubahan' &&
+                                        deleteItemConfirm?.index === index
+                                          ? 'bg-red-500 hover:bg-red-600 text-white'
+                                          : 'bg-red-500/10 hover:bg-red-500/20 text-red-400'
+                                      }`}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </motion.button>
+                                  )}
+                                </AnimatePresence>
                               </div>
                             ))}
                           </div>
+                          {deleteItemConfirm?.entryId === entry.id && deleteItemConfirm?.type === 'perubahan' && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex items-center gap-2 p-2 mt-2 bg-red-500/10 border border-red-500/20 rounded-lg"
+                            >
+                              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                              <p className="text-xs text-red-400">Klik tombol delete lagi untuk konfirmasi!</p>
+                            </motion.div>
+                          )}
                         </div>
 
                         <div className="p-3 bg-orange-500/5 border border-orange-500/20 rounded-lg">
@@ -558,15 +617,39 @@ export default function AdminDashboard() {
                                   className="flex-1 px-3 py-2 bg-slate-800 border border-orange-500/30 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                                   placeholder="Perbaiki bug..."
                                 />
-                                <button
-                                  onClick={() => removeChange(entry.id, 'perbaikan', index)}
-                                  className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                <AnimatePresence>
+                                  {editingEntryId === entry.id && (
+                                    <motion.button
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.8 }}
+                                      onClick={() => removeChange(entry.id, 'perbaikan', index)}
+                                      className={`px-3 py-2 rounded transition-colors ${
+                                        deleteItemConfirm?.entryId === entry.id &&
+                                        deleteItemConfirm?.type === 'perbaikan' &&
+                                        deleteItemConfirm?.index === index
+                                          ? 'bg-red-500 hover:bg-red-600 text-white'
+                                          : 'bg-red-500/10 hover:bg-red-500/20 text-red-400'
+                                      }`}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </motion.button>
+                                  )}
+                                </AnimatePresence>
                               </div>
                             ))}
                           </div>
+                          {deleteItemConfirm?.entryId === entry.id && deleteItemConfirm?.type === 'perbaikan' && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex items-center gap-2 p-2 mt-2 bg-red-500/10 border border-red-500/20 rounded-lg"
+                            >
+                              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                              <p className="text-xs text-red-400">Klik tombol delete lagi untuk konfirmasi!</p>
+                            </motion.div>
+                          )}
                         </div>
                       </div>
 
@@ -588,6 +671,29 @@ export default function AdminDashboard() {
                     </motion.div>
                   ))}
                 </div>
+
+                {changelog.length > 5 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-center pt-4"
+                  >
+                    <button
+                      onClick={() => setShowAllChangelogs(!showAllChangelogs)}
+                      className="flex items-center gap-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                    >
+                      <span className="font-medium">
+                        {showAllChangelogs ? 'Show Less' : `Show All (${changelog.length} entries)`}
+                      </span>
+                      <motion.div
+                        animate={{ rotate: showAllChangelogs ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ChevronDown size={20} />
+                      </motion.div>
+                    </button>
+                  </motion.div>
+                )}
               </motion.div>
             )}
           </div>
