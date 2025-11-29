@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { LogOut, Settings, FileText, Plus, Trash2, Save, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SiteConfig {
   id: string;
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingEntryId, setSavingEntryId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [config, setConfig] = useState<SiteConfig | null>(null);
@@ -84,24 +86,29 @@ export default function AdminDashboard() {
 
       if (error) throw error;
       setMessage({ type: 'success', text: 'Configuration saved successfully!' });
+      setTimeout(() => setMessage(null), 3000);
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
+      setTimeout(() => setMessage(null), 5000);
     } finally {
       setSaving(false);
     }
   };
 
   const addChangelogEntry = () => {
+    const today = new Date();
+    const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+
     const newEntry: ChangelogEntry = {
       id: crypto.randomUUID(),
       version: '1.0.0',
-      date: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/'),
+      date: formattedDate,
       changes: {
         penambahan: [],
         perubahan: [],
         perbaikan: []
       },
-      sort_order: changelog.length
+      sort_order: changelog.length > 0 ? Math.max(...changelog.map(e => e.sort_order)) + 1 : 1
     };
     setChangelog([newEntry, ...changelog]);
   };
@@ -149,33 +156,80 @@ export default function AdminDashboard() {
   };
 
   const deleteChangelogEntry = (id: string) => {
-    setChangelog(changelog.filter(entry => entry.id !== id));
+    deleteChangelogFromDB(id);
   };
 
-  const saveChangelog = async () => {
-    setSaving(true);
+  const validateDate = (dateStr: string): boolean => {
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    return regex.test(dateStr);
+  };
+
+  const saveChangelogEntry = async (entryId: string) => {
+    const entry = changelog.find(e => e.id === entryId);
+    if (!entry) return;
+
+    if (!validateDate(entry.date)) {
+      setMessage({ type: 'error', text: 'Format tanggal harus DD/MM/YYYY' });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
+
+    setSavingEntryId(entryId);
     setMessage(null);
 
     try {
-      await supabase.from('changelog_entries').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      const existingEntry = await supabase
+        .from('changelog_entries')
+        .select('id')
+        .eq('id', entryId)
+        .maybeSingle();
 
-      const entries = changelog.map((entry, index) => ({
-        id: entry.id,
-        version: entry.version,
-        date: entry.date,
-        changes: entry.changes,
-        sort_order: changelog.length - index
-      }));
+      if (existingEntry.data) {
+        const { error } = await supabase
+          .from('changelog_entries')
+          .update({
+            version: entry.version,
+            date: entry.date,
+            changes: entry.changes,
+            sort_order: entry.sort_order
+          })
+          .eq('id', entryId);
 
-      const { error } = await supabase.from('changelog_entries').insert(entries);
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('changelog_entries')
+          .insert({
+            id: entry.id,
+            version: entry.version,
+            date: entry.date,
+            changes: entry.changes,
+            sort_order: entry.sort_order
+          });
+
+        if (error) throw error;
+      }
 
       setMessage({ type: 'success', text: 'Changelog saved successfully!' });
+      setTimeout(() => setMessage(null), 3000);
       await loadData();
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message });
+      setTimeout(() => setMessage(null), 5000);
     } finally {
-      setSaving(false);
+      setSavingEntryId(null);
+    }
+  };
+
+  const deleteChangelogFromDB = async (entryId: string) => {
+    try {
+      await supabase.from('changelog_entries').delete().eq('id', entryId);
+      setChangelog(changelog.filter(entry => entry.id !== entryId));
+      setMessage({ type: 'success', text: 'Changelog deleted successfully!' });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+      setTimeout(() => setMessage(null), 5000);
     }
   };
 
@@ -232,20 +286,37 @@ export default function AdminDashboard() {
           </div>
 
           <div className="p-6">
-            {message && (
-              <div className={`mb-6 flex items-center gap-2 p-4 rounded-lg ${
-                message.type === 'success'
-                  ? 'bg-green-500/10 border border-green-500/20 text-green-400'
-                  : 'bg-red-500/10 border border-red-500/20 text-red-400'
-              }`}>
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <p className="text-sm">{message.text}</p>
-              </div>
-            )}
+            <AnimatePresence>
+              {message && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className={`mb-6 flex items-center gap-2 p-4 rounded-lg ${
+                    message.type === 'success'
+                      ? 'bg-green-500/10 border border-green-500/20 text-green-400'
+                      : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                  }`}
+                >
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <p className="text-sm">{message.text}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {activeTab === 'config' && config && (
-              <div className="space-y-6">
-                <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-6"
+              >
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     GitHub Repository URL
                   </label>
@@ -253,11 +324,15 @@ export default function AdminDashboard() {
                     type="text"
                     value={config.github_repo_url}
                     onChange={(e) => setConfig({ ...config, github_repo_url: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
-                </div>
+                </motion.div>
 
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Download URL
                   </label>
@@ -265,11 +340,15 @@ export default function AdminDashboard() {
                     type="text"
                     value={config.download_url}
                     onChange={(e) => setConfig({ ...config, download_url: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
-                </div>
+                </motion.div>
 
-                <div>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Current Version
                   </label>
@@ -277,37 +356,60 @@ export default function AdminDashboard() {
                     type="text"
                     value={config.version}
                     onChange={(e) => setConfig({ ...config, version: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                   />
-                </div>
+                </motion.div>
 
-                <button
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={saveConfig}
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 text-white font-semibold rounded-lg transition-all"
                 >
-                  <Save className="w-5 h-5" />
+                  <motion.div
+                    animate={saving ? { rotate: 360 } : {}}
+                    transition={saving ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
+                  >
+                    <Save className="w-5 h-5" />
+                  </motion.div>
                   {saving ? 'Saving...' : 'Save Configuration'}
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             )}
 
             {activeTab === 'changelog' && (
-              <div className="space-y-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-6"
+              >
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-white">Changelog Entries</h2>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={addChangelogEntry}
                     className="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-colors"
                   >
                     <Plus className="w-5 h-5" />
                     Add Entry
-                  </button>
+                  </motion.button>
                 </div>
 
                 <div className="space-y-4">
-                  {changelog.map((entry) => (
-                    <div key={entry.id} className="p-4 bg-slate-900/50 border border-slate-600 rounded-lg space-y-4">
+                  {changelog.map((entry, index) => (
+                    <motion.div
+                      key={entry.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="p-4 bg-slate-900/50 border border-slate-600 rounded-lg space-y-4"
+                    >
                       <div className="flex gap-3">
                         <input
                           type="text"
@@ -332,7 +434,7 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="space-y-3">
-                        <div>
+                        <div className="p-3 bg-green-500/5 border border-green-500/20 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-sm font-medium text-green-400">Penambahan</h4>
                             <button
@@ -349,7 +451,7 @@ export default function AdminDashboard() {
                                   type="text"
                                   value={change}
                                   onChange={(e) => updateChange(entry.id, 'penambahan', index, e.target.value)}
-                                  className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="flex-1 px-3 py-2 bg-slate-800 border border-green-500/30 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
                                   placeholder="Tambahkan fitur baru..."
                                 />
                                 <button
@@ -363,7 +465,7 @@ export default function AdminDashboard() {
                           </div>
                         </div>
 
-                        <div>
+                        <div className="p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-sm font-medium text-blue-400">Perubahan</h4>
                             <button
@@ -380,7 +482,7 @@ export default function AdminDashboard() {
                                   type="text"
                                   value={change}
                                   onChange={(e) => updateChange(entry.id, 'perubahan', index, e.target.value)}
-                                  className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="flex-1 px-3 py-2 bg-slate-800 border border-blue-500/30 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   placeholder="Ubah fitur yang ada..."
                                 />
                                 <button
@@ -394,7 +496,7 @@ export default function AdminDashboard() {
                           </div>
                         </div>
 
-                        <div>
+                        <div className="p-3 bg-orange-500/5 border border-orange-500/20 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="text-sm font-medium text-orange-400">Perbaikan</h4>
                             <button
@@ -411,7 +513,7 @@ export default function AdminDashboard() {
                                   type="text"
                                   value={change}
                                   onChange={(e) => updateChange(entry.id, 'perbaikan', index, e.target.value)}
-                                  className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="flex-1 px-3 py-2 bg-slate-800 border border-orange-500/30 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                                   placeholder="Perbaiki bug..."
                                 />
                                 <button
@@ -425,19 +527,26 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </div>
-                    </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => saveChangelogEntry(entry.id)}
+                        disabled={savingEntryId === entry.id}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 disabled:bg-slate-600/50 text-blue-400 disabled:text-slate-500 rounded-lg transition-all border border-blue-500/20"
+                      >
+                        <motion.div
+                          animate={savingEntryId === entry.id ? { rotate: 360 } : {}}
+                          transition={savingEntryId === entry.id ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
+                        >
+                          <Save className="w-4 h-4" />
+                        </motion.div>
+                        {savingEntryId === entry.id ? 'Saving...' : 'Save This Entry'}
+                      </motion.button>
+                    </motion.div>
                   ))}
                 </div>
-
-                <button
-                  onClick={saveChangelog}
-                  disabled={saving}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
-                >
-                  <Save className="w-5 h-5" />
-                  {saving ? 'Saving...' : 'Save Changelog'}
-                </button>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
