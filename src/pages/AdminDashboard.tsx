@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LogOut, Settings, FileText, Plus, Trash2, Save, AlertCircle, ChevronDown } from 'lucide-react';
+import { LogOut, Settings, FileText, Plus, Trash2, Save, AlertCircle, ChevronDown, Key } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SiteConfig {
@@ -37,7 +37,12 @@ export default function AdminDashboard() {
   const [showAllChangelogs, setShowAllChangelogs] = useState(false);
   const [deleteItemConfirm, setDeleteItemConfirm] = useState<{entryId: string, type: string, index: number} | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'config' | 'changelog'>('config');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<'config' | 'changelog' | 'password'>('config');
 
   useEffect(() => {
     checkAuth();
@@ -252,6 +257,54 @@ export default function AdminDashboard() {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: 'New passwords do not match!' });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setMessage({ type: 'error', text: 'Password must be at least 6 characters!' });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) throw new Error('User not found');
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) throw new Error('Current password is incorrect');
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (updateError) throw updateError;
+
+      setMessage({ type: 'success', text: 'Password updated successfully!' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to update password' });
+      setTimeout(() => setMessage(null), 5000);
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
@@ -301,6 +354,17 @@ export default function AdminDashboard() {
             >
               <FileText className="w-5 h-5" />
               Changelog
+            </button>
+            <button
+              onClick={() => setActiveTab('password')}
+              className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 font-semibold transition-colors ${
+                activeTab === 'password'
+                  ? 'bg-blue-500/10 text-blue-400 border-b-2 border-blue-500'
+                  : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
+              }`}
+            >
+              <Key className="w-5 h-5" />
+              Change Password
             </button>
           </div>
 
@@ -694,6 +758,86 @@ export default function AdminDashboard() {
                     </button>
                   </motion.div>
                 )}
+              </motion.div>
+            )}
+
+            {activeTab === 'password' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-2xl mx-auto"
+              >
+                <h2 className="text-lg font-semibold text-white mb-6">Change Admin Password</h2>
+
+                <form onSubmit={handlePasswordChange} className="space-y-6">
+                  <div>
+                    <label htmlFor="currentPassword" className="block text-sm font-medium text-slate-300 mb-2">
+                      Current Password
+                    </label>
+                    <input
+                      id="currentPassword"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter current password"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-slate-300 mb-2">
+                      New Password
+                    </label>
+                    <input
+                      id="newPassword"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter new password (min 6 characters)"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300 mb-2">
+                      Confirm New Password
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Confirm new password"
+                    />
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    disabled={passwordLoading}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all"
+                  >
+                    <motion.div
+                      animate={passwordLoading ? { rotate: 360 } : {}}
+                      transition={passwordLoading ? { duration: 1, repeat: Infinity, ease: "linear" } : {}}
+                    >
+                      <Key className="w-5 h-5" />
+                    </motion.div>
+                    {passwordLoading ? 'Updating Password...' : 'Update Password'}
+                  </motion.button>
+
+                  <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+                    <p className="text-sm text-slate-300">
+                      <strong className="text-blue-400">Note:</strong> Password must be at least 6 characters long. After changing your password, you'll remain logged in.
+                    </p>
+                  </div>
+                </form>
               </motion.div>
             )}
           </div>

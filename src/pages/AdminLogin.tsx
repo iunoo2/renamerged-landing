@@ -1,18 +1,27 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Lock, Mail, AlertCircle } from 'lucide-react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!captchaToken) {
+      setError('Please complete the reCAPTCHA');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -25,6 +34,8 @@ export default function AdminLogin() {
       navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed');
+      setCaptchaToken(null);
+      recaptchaRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -77,6 +88,19 @@ export default function AdminLogin() {
                   placeholder="Enter your password"
                 />
               </div>
+            </div>
+
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || ''}
+                onChange={(token) => {
+                  setCaptchaToken(token);
+                  setError('');
+                }}
+                onExpired={() => setCaptchaToken(null)}
+                theme="dark"
+              />
             </div>
 
             {error && (
